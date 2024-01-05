@@ -4,23 +4,33 @@ var path = require('path');
 var webpack = require('webpack');
 const COLORS = require('./src/constants/colors.js');
 
-PLUGINS = [
-  new webpack.EnvironmentPlugin(['DEBUG_LOG', 'NODE_ENV']),
+const plugins = [
+  // new webpack.EnvironmentPlugin({
+  //   DEBUG_LOG: 'DEBUG_LOG',
+  //   NODE_ENV: 'NODE_ENV'
+  // }),
   new webpack.HotModuleReplacementPlugin(),
   // @firebase/polyfill not loading, stub it with some random module.
   new webpack.NormalModuleReplacementPlugin(
     /firebase\/polyfill/,
     '../../../../src/constants/colors.js'
-  )
+  ),
+  new webpack.DefinePlugin({
+    'process.env.NODE_ENV': JSON.stringify('development') // or 'production'
+  })
 ];
 
 module.exports = {
+  mode: 'development',
   optimization: {
     minimize: process.env.NODE_ENV === 'production'
   },
   devServer: {
-    disableHostCheck: true,
-    hotOnly: true
+    hot: true,
+    historyApiFallback: true,
+    static: {
+      directory: path.join(__dirname,"build")
+    }
   },
   entry: {
     build: './src/index.js',
@@ -28,10 +38,10 @@ module.exports = {
   },
   output: {
     globalObject: 'this',
-    path: __dirname,
+    path: path.resolve(__dirname),
     filename: 'build/[name].js'
   },
-  plugins: PLUGINS,
+  plugins,
   module: {
     rules: [
       {
@@ -43,7 +53,7 @@ module.exports = {
         test: /\.json/,
         exclude: /(node_modules)/,
         type: 'javascript/auto',
-        loader: ['json-loader']
+        loader: 'json-loader'
       },
       {
         test: /\.html/,
@@ -90,6 +100,6 @@ module.exports = {
     ]
   },
   resolve: {
-    modules: [path.join(__dirname, 'node_modules')]
+    modules: [path.resolve(__dirname, 'node_modules')],
   }
 };
