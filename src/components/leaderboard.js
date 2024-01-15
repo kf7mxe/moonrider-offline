@@ -45,6 +45,7 @@ AFRAME.registerComponent('leaderboard', {
 
   update: function (oldData) {
     // Initialize Cloud Firestore through Firebase.
+    if (firebase.apps !== undefined) {
     if (!firebase.apps.length && this.data.apiKey) {
       firebase.initializeApp({
         apiKey: this.data.apiKey,
@@ -56,8 +57,9 @@ AFRAME.registerComponent('leaderboard', {
       });
       this.firestore = firebase.firestore();
       this.firestore.settings({});
-      this.db = this.firestore.collection('scores');
+      // this.db = this.firestore.collection('scores');
     }
+  }
 
     if (!oldData.isVictory && this.data.isVictory) {
       this.checkLeaderboardQualify();
@@ -97,7 +99,7 @@ AFRAME.registerComponent('leaderboard', {
 
     if (!pr.includes(this.username.toLowerCase()) &&
       !this.username.match(ba)) {
-      this.db.add(scoreData);
+      // this.db.add(scoreData);
     }
 
     this.addEventDetail.scoreData = scoreData;
@@ -108,27 +110,27 @@ AFRAME.registerComponent('leaderboard', {
     if (this.data.gameMode === 'ride') { return; }
 
     const state = this.el.sceneEl.systems.state.state;
-    const query = this.db
-      .where('challengeId', '==', challengeId)
-      .where(
-        'difficulty', '==',
-        state.menuSelectedChallenge.id
-          ? state.menuSelectedChallenge.difficulty
-          : state.challenge.difficulty)
-      .where('gameMode', '==', this.data.gameMode)
-      .orderBy('score', 'desc')
-      .orderBy('time', 'asc')
-      .limit(10);
-    query.get().then(snapshot => {
-      this.eventDetail.challengeId = challengeId;
-      this.scores.length = 0;
-      if (!snapshot.empty) {
-        snapshot.forEach(score => this.scores.push(score.data()));
-      }
-      this.el.sceneEl.emit('leaderboard', this.eventDetail, false);
-    }).catch(e => {
-      console.error('[firestore]', e);
-    });
+    // const query = this.db
+    //   .where('challengeId', '==', challengeId)
+    //   .where(
+    //     'difficulty', '==',
+    //     state.menuSelectedChallenge.id
+    //       ? state.menuSelectedChallenge.difficulty
+    //       : state.challenge.difficulty)
+    //   .where('gameMode', '==', this.data.gameMode)
+    //   .orderBy('score', 'desc')
+    //   .orderBy('time', 'asc')
+    //   .limit(10);
+    // query.get().then(snapshot => {
+    //   this.eventDetail.challengeId = challengeId;
+    //   this.scores.length = 0;
+    //   if (!snapshot.empty) {
+    //     snapshot.forEach(score => this.scores.push(score.data()));
+    //   }
+    //   this.el.sceneEl.emit('leaderboard', this.eventDetail, false);
+    // }).catch(e => {
+    //   console.error('[firestore]', e);
+    // });
   },
 
   /**

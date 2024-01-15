@@ -1,6 +1,12 @@
-# Moon Rider
 
-![moonrider](https://user-images.githubusercontent.com/674727/54646629-e91dc600-4a5c-11e9-8a6e-91e77f28523d.jpg)
+# Offline version of the repo Moonrider repo
+https://github.com/supermedium/moonrider
+
+The goal of this is to make it run offline in a containerized web browser in a quest app
+
+<blockquote> # Moon Rider
+
+ ![moonrider](https://user-images.githubusercontent.com/674727/54646629-e91dc600-4a5c-11e9-8a6e-91e77f28523d.jpg)
 
 Surf the musical road among the moon, stars, and northern lights.
 
@@ -79,3 +85,4 @@ npm run deploy
 ```
 
 The website will be available on `https://yourusername.github.io/moonrider/`.
+</blockquote>
