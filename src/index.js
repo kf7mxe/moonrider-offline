@@ -14,11 +14,11 @@ require('aframe-event-set-component');
 require('aframe-geometry-merger-component');
 require('aframe-haptics-component');
 require('aframe-layout-component');
-if (process.env.DEBUG_LOG) {
-  require('aframe-log-component');
-} else {
-  AFRAME.log = () => void 0;
-}
+// if (true) {
+//   require('aframe-log-component');
+// } else {
+//   AFRAME.log = () => void 0;
+// }
 require('aframe-orbit-controls');
 require('aframe-proxy-event-component');
 require('aframe-render-order-component');
@@ -73,9 +73,9 @@ function initSubscribeForm () {
     // supermedium/superchimp
     const xhr = new XMLHttpRequest();
     let endpoint = 'http://localhost:5000/mail/subscribe';
-    if (process.env.NODE_ENV === 'production') {
-      endpoint = 'https://supermedium.com/mail/subscribe';
-    }
+    // if (process.env.NODE_ENV === 'production') {
+    //   endpoint = 'https://supermedium.com/mail/subscribe';
+    // }
     xhr.open('POST', endpoint);
 
     xhr.addEventListener('load', () => {

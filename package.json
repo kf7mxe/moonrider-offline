@@ -1,5 +1,5 @@
 {
-  "name":"",
+  "name": "",
   "private": true,
   "version": "1.0.0",
   "scripts": {
@@ -8,7 +8,8 @@
     "lint": "semistandard -v | snazzy",
     "lint:fix": "semistandard --fix",
     "predeploy": "cross-env NODE_ENV=production npm run build && shx mkdir -p .ghpages && cp -r index.html assets build vendor CNAME .ghpages",
-    "start": "webpack serve --mode development"
+    "start": "NODE_ENV=dev && webpack serve --mode development",
+    "dev": "npm run build && webpack-dev-server"
   },
   "dependencies": {
     "@babel/cli": "^7.23.4",
@@ -43,7 +44,7 @@
     "aframe-proxy-event-component": "^2.1.0",
     "aframe-render-order-component": "^1.1.0",
     "aframe-slice9-component": "^1.0.0",
-    "aframe-state-component": "7.1.1",
+    "aframe-state-component": "6.7.0",
     "aframe-super-hot-html-loader": "^2.1.0",
     "aframe-super-hot-loader": "^1.7.0",
     "aframe-thumb-controls-component": "^2.0.3",
@@ -53,11 +54,13 @@
     "babel-preset-minify": "^0.5.2",
     "css-loader": "6.8.1",
     "debug": "^4.3.4",
+    "dotenv": "^16.3.1",
     "firebase": "10.7.1",
     "html-require-loader": "^1.0.1",
     "ip": "1.1.8",
     "json-loader": "^0.5.7",
     "jszip": "^3.10.1",
+    "jszip-utils": "^0.1.0",
     "lodash.debounce": "^4.0.8",
     "profane-words": "^1.5.11",
     "promise-polyfill": "^8.3.0",

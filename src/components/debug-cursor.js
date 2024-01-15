@@ -3,9 +3,9 @@
  */
 AFRAME.registerComponent('debug-cursor', {
   init: function () {
-    if (process.env.NODE_ENV === 'production') {
-      return;
-    }
+    // if (process.env.NODE_ENV === 'production') {
+    //   return;
+    // }
 
     this.el.addEventListener('mouseenter', evt => {
       this.log('mouseenter', evt.detail.intersectedEl, 'green');

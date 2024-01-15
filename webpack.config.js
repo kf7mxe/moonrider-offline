@@ -3,21 +3,23 @@ var ip = require('ip');
 var path = require('path');
 var webpack = require('webpack');
 const COLORS = require('./src/constants/colors.js');
+require('dotenv').config();
+
 
 const plugins = [
-  // new webpack.EnvironmentPlugin({
-  //   DEBUG_LOG: 'DEBUG_LOG',
-  //   NODE_ENV: 'NODE_ENV'
-  // }),
+  new webpack.ProvidePlugin({
+    process: 'process/browser', // Use a browser-compatible process polyfill
+  }),
+  new webpack.EnvironmentPlugin({
+    'process.env.NODE_ENV':JSON.stringify(process.env.NODE_ENV || 'development'),
+    'process.env.DEBUG_LOG':JSON.stringify(process.env.DEBUG_LOG || true)
+  }),
   new webpack.HotModuleReplacementPlugin(),
   // @firebase/polyfill not loading, stub it with some random module.
   new webpack.NormalModuleReplacementPlugin(
     /firebase\/polyfill/,
     '../../../../src/constants/colors.js'
-  ),
-  new webpack.DefinePlugin({
-    'process.env.NODE_ENV': JSON.stringify('development') // or 'production'
-  })
+  )
 ];
 
 module.exports = {
@@ -39,7 +41,8 @@ module.exports = {
   output: {
     globalObject: 'this',
     path: path.resolve(__dirname),
-    filename: 'build/[name].js'
+    filename: 'build/[name].js',
+    publicPath:'/'
   },
   plugins,
   module: {

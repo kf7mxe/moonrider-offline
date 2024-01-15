@@ -52,14 +52,14 @@ AFRAME.registerComponent('song', {
     this.el.addEventListener('wallhitstart', this.onWallHitStart.bind(this));
     this.el.addEventListener('wallhitend', this.onWallHitEnd.bind(this));
 
-    if (process.env.NODE_ENV !== 'production') {
-      this.el.addEventListener('victoryfake', () => {
-        this.source.onended = null;
-        this.source.stop();
-        this.source.disconnect();
-        this.onSongComplete();
-      });
-    }
+    // if (process.env.NODE_ENV !== 'production') {
+    //   this.el.addEventListener('victoryfake', () => {
+    //     this.source.onended = null;
+    //     this.source.stop();
+    //     this.source.disconnect();
+    //     this.onSongComplete();
+    //   });
+    // }
   },
 
   update: function (oldData) {
