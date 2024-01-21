@@ -1,8 +1,9 @@
 var window = self;
 
 const JSZip = require('jszip');
-//JSZipUtils 
-import JSZipUtils from 'jszip-utils';const difficulties = [];
+
+
+const difficulties = [];
 
 const xhrs = {};
 
@@ -12,35 +13,18 @@ addEventListener('message', async function (evt) {
   const version = evt.data.version;
   const hash = evt.data.hash;
 
-  console.log("difficulties", difficulties)
-  console.log("version", version)
-
-  console.log("hash", hash)
-
   const [short] = version.split('-');
-  console.log("short", short)
-
   try {
-    console.log("right here 0")
-    console.log("test", evt)
-    console.log("test2",evt.data)
-    console.log("test3", evt.data.directDownload)
-
-    JSZipUtils.getBinaryContent(evt.data.directDownload, async function(err, zipData){
-      if (err){
-        throw err;
-      }
+    fetch(evt.data.directDownload).then(async function(response){
+      const zipData = await response.blob();
       const zip = await JSZip.loadAsync(zipData);
-      console.log('righ here 1')
   
       const entries = Object.values(zip.files);
-      console.log("right here 2")
   
       const data = {
         audio: undefined,
         beats: {}
       };
-      console.log("right here 3")
   
       const beatFiles = {};
   
@@ -49,12 +33,10 @@ addEventListener('message', async function (evt) {
   
         const chunks = await entry.async('uint8array');
   
-        console.log("in for loop")
   
         if (entry.name.endsWith('.egg') || entry.name.endsWith('.ogg')) {
           const blob = new Blob([chunks], { type: 'application/octet-binary' });
           const url = URL.createObjectURL(blob);
-          console.log("in the if statement .gg ets")
   
           data.audio = url;
         } else {

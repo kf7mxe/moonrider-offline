@@ -50,6 +50,16 @@ if (favorites) {
   favorites = [];
 }
 
+// downloaded songs
+const downloadedSongs = []
+getAllSongs(downloadedSongs).then((downloadedSongs) => {
+  console.log("downloadedSongsURLs",downloadedSongs)
+  // downloadedSongsURLs.forEach((downloadedSongURL) => {
+  //   downloadSong(downloadedSongURL)
+  // })
+})
+// console.log("downloadedSongsURLs",downloadedSongsURLs)
+
 /**
  * State handler.
  *
@@ -90,6 +100,7 @@ AFRAME.registerState({
     difficultyFilter: 'All',
     difficultyFilterMenuOpen: false,
     favorites: favorites,
+    downloadedSongs: downloadedSongs,
     gameMode: 'ride',
     genre: '',
     genres: require('../constants/genres'),
@@ -131,6 +142,7 @@ AFRAME.registerState({
       index: -1,
       image: '',
       isFavorited: false,
+      isDownloaded: false,
       numBeats: undefined,
       songDuration: 0,
       songInfoText: '',
@@ -343,6 +355,22 @@ AFRAME.registerState({
       } catch (e) { }
     },
 
+
+    downloadtoggle: state => {
+      const id = state.menuSelectedChallenge.id;
+      const challenge = challengeDataStore[id];
+      const url = challenge.directDownload;
+      if (!url) { return; }
+      // save to origin private file system
+      console.log("in download toggle")
+      if (state.menuSelectedChallenge.isDownloaded) {
+        removeDownloadedSong(url)
+      } else {
+        downloadSong(url,challenge,state)
+      }
+
+    },
+
     favoritetoggle: state => {
       const id = state.menuSelectedChallenge.id;
       const challenge = challengeDataStore[id];
@@ -552,6 +580,12 @@ AFRAME.registerState({
       // Favorited.
       const isFavorited = !!state.favorites.filter(favorite => favorite.id === id).length;
       state.menuSelectedChallenge.isFavorited = isFavorited;
+
+      // downloaded 
+      console.log("state.downloadedSongs",downloadedSongs)
+      const isDownloaded = !!downloadedSongs.filter(downloadedSong => downloadedSong.id === id).length;
+      state.menuSelectedChallenge.isDownloaded = isDownloaded;
+      console.log("isDownloaded",isDownloaded)
 
       // Clear leaderboard.
       clearLeaderboard(state);
@@ -998,3 +1032,116 @@ function updateScoreAccuracy(state) {
   state.score.accuracy = state.score.accuracy.toFixed(2);
   state.score.accuracyInt = parseInt(state.score.accuracy);
 }
+
+
+
+
+
+
+// function to download a zip file and store it in the indexDB
+function downloadSong(url,songData,state) {
+  const dbName = 'songs';
+  const dbVersion = 1;
+  return fetch(url)
+    .then(async function(response){
+      console.log("finished fetching url")
+      const zipFile = await response.blob();
+      const db_request = indexedDB.open(dbName, dbVersion);
+      console.log("finished opening db")
+      db_request.onerror = function(event) {
+        console.log("error: ");
+      };
+      db_request.onsuccess = function(event) {
+        console.log("in success loading db")
+        const db = event.target.result;
+        const transaction = db.transaction(["songs"], "readwrite");
+        const objectStore = transaction.objectStore("songs");
+        const song = {
+          url: url,
+          zip: zipFile,
+          songData: songData
+        }
+        const addSongRequest = objectStore.add(song);
+        addSongRequest.onsuccess = function(event) {
+          console.log("added song to db")
+          state.menuSelectedChallenge.isDownloaded = true;
+        }
+      };
+      db_request.onupgradeneeded = function(event) {
+        const db = event.target.result;
+        const songsTable = db.createObjectStore("songs", {keyPath: "url"});
+      }
+    }
+    )
+}
+
+function removeDownloadedSong(url) {
+  const dbName = 'songs';
+  const dbVersion = 1;
+  const db_request = indexedDB.open(dbName, dbVersion);
+  db_request.onerror = function(event) {
+    console.log("error: ");
+  };
+  db_request.onsuccess = function(event) {
+    const db = event.target.result;
+    const transaction = db.transaction(["songs"], "readwrite");
+    const objectStore = transaction.objectStore("songs");
+    const deleteSongRequest = objectStore.delete(url);
+    deleteSongRequest.onsuccess = function(event) {
+      console.log("deleted song from db")
+    }
+  };
+}
+
+function retrieveSong(url){
+  const dbName = 'songs';
+  const dbVersion = 1;
+  const transaction = db.transaction(["songs"]);
+  const objectStore = transaction.objectStore("songs");
+  const request = objectStore.get(url);
+  request.onsuccess = function(event) {
+    console.log("success: "+event.target.result);
+    const cursor = event.target.result;
+    if (cursor) {
+      cursor.continue();
+    }
+  };  
+
+  request.onerror = function(event) {
+    console.log("error: ");
+  };
+}
+
+function getAllSongs(downloadedSongsURLs) {
+  return new Promise((resolve, reject) => {
+  const dbName = 'songs';
+  const dbVersion = 1;
+  const db_request = indexedDB.open(dbName, dbVersion);
+  db_request.onerror = function(event) {
+    console.log("error: ");
+  };
+  db_request.onsuccess = function(event) {
+    const db = event.target.result;
+  const transaction = db.transaction(["songs"]);
+  const objectStore = transaction.objectStore("songs");
+  const request = objectStore.getAll();
+  request.onerror = function(event) {
+    console.log("error: ");
+    reject();
+  };
+  request.onsuccess = function(event) {
+    console.log("success: "+event.target.result);
+    const cursor = event.target.result;
+    if (cursor) {
+      console.log("songs")
+      for (let i = 0; i < cursor.length; i++) {
+        downloadedSongsURLs
+        downloadedSongsURLs.push(cursor[i].songData)
+      }
+      resolve(downloadedSongsURLs);
+    }
+  };
+}})
+}
+
+

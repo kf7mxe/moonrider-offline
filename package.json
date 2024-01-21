@@ -60,7 +60,6 @@
     "ip": "1.1.8",
     "json-loader": "^0.5.7",
     "jszip": "^3.10.1",
-    "jszip-utils": "^0.1.0",
     "lodash.debounce": "^4.0.8",
     "profane-words": "^1.5.11",
     "promise-polyfill": "^8.3.0",
@@ -87,6 +86,7 @@
   "devDependencies": {
     "cross-env": "7.0.3",
     "ghpages": "0.0.10",
+    "jszip-utils": "^0.1.0",
     "semistandard": "17.0.0",
     "shx": "^0.3.4",
     "snazzy": "9.0.0",
