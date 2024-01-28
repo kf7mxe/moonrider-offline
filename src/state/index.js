@@ -52,13 +52,17 @@ if (favorites) {
 
 // downloaded songs
 const downloadedSongs = []
-getAllSongs(downloadedSongs).then((downloadedSongs) => {
+getAllDownloadedSongs(downloadedSongs).then((downloadedSongs) => {
   console.log("downloadedSongsURLs",downloadedSongs)
   // downloadedSongsURLs.forEach((downloadedSongURL) => {
   //   downloadSong(downloadedSongURL)
   // })
 })
 // console.log("downloadedSongsURLs",downloadedSongsURLs)
+
+let initialOnlineStatus = window.navigator.onLine
+
+
 
 /**
  * State handler.
@@ -127,6 +131,7 @@ AFRAME.registerState({
     leaderboardQualified: false,
     leaderboardNames: '',
     leaderboardScores: '',
+    offlineStatus: initialOnlineStatus,
     mainMenuActive: false,
     menuActive: SKIP_INTRO, // Main menu active.
     menuDifficulties: [],
@@ -362,7 +367,6 @@ AFRAME.registerState({
       const url = challenge.directDownload;
       if (!url) { return; }
       // save to origin private file system
-      console.log("in download toggle")
       if (state.menuSelectedChallenge.isDownloaded) {
         removeDownloadedSong(url)
       } else {
@@ -582,10 +586,8 @@ AFRAME.registerState({
       state.menuSelectedChallenge.isFavorited = isFavorited;
 
       // downloaded 
-      console.log("state.downloadedSongs",downloadedSongs)
       const isDownloaded = !!downloadedSongs.filter(downloadedSong => downloadedSong.id === id).length;
       state.menuSelectedChallenge.isDownloaded = isDownloaded;
-      console.log("isDownloaded",isDownloaded)
 
       // Clear leaderboard.
       clearLeaderboard(state);
@@ -853,6 +855,21 @@ AFRAME.registerState({
     startgame: state => {
       state.introActive = false;
       state.menuActive = true;
+
+      if (initialOnlineStatus) {
+        fetch('https://cdn.beatsaver.com/89cf8bb07afb3c59ae7b5ac00337d62261c36fb4.zip').then((response) => {
+          if (response.status === 200) {
+            state.offlineStatus = true
+          } else {
+            state.offlineStatus = false
+          }
+        }
+        ).catch((error) => {
+          state.offlineStatus = false
+        })
+      }
+
+
     },
 
     victoryfake: state => {
@@ -916,6 +933,7 @@ function computeSearchPagination(state) {
 
   state.searchResultsPage.length = 0;
   state.searchResultsPage.__dirty = true;
+
   for (let i = state.search.page * SEARCH_PER_PAGE;
     i < state.search.page * SEARCH_PER_PAGE + SEARCH_PER_PAGE; i++) {
     const result = state.search.results[i];
@@ -1038,16 +1056,16 @@ function updateScoreAccuracy(state) {
 
 
 
+
+
 // function to download a zip file and store it in the indexDB
 function downloadSong(url,songData,state) {
   const dbName = 'songs';
   const dbVersion = 1;
   return fetch(url)
     .then(async function(response){
-      console.log("finished fetching url")
       const zipFile = await response.blob();
       const db_request = indexedDB.open(dbName, dbVersion);
-      console.log("finished opening db")
       db_request.onerror = function(event) {
         console.log("error: ");
       };
@@ -1093,26 +1111,9 @@ function removeDownloadedSong(url) {
   };
 }
 
-function retrieveSong(url){
-  const dbName = 'songs';
-  const dbVersion = 1;
-  const transaction = db.transaction(["songs"]);
-  const objectStore = transaction.objectStore("songs");
-  const request = objectStore.get(url);
-  request.onsuccess = function(event) {
-    console.log("success: "+event.target.result);
-    const cursor = event.target.result;
-    if (cursor) {
-      cursor.continue();
-    }
-  };  
 
-  request.onerror = function(event) {
-    console.log("error: ");
-  };
-}
 
-function getAllSongs(downloadedSongsURLs) {
+function getAllDownloadedSongs(downloadedSongsURLs) {
   return new Promise((resolve, reject) => {
   const dbName = 'songs';
   const dbVersion = 1;
@@ -1143,5 +1144,19 @@ function getAllSongs(downloadedSongsURLs) {
   };
 }})
 }
+
+//listen to changes in connection status and set offlineStatus to true if offline and false if online
+window.addEventListener('online', function(e) { 
+  fetch('https://beatsaver.com/api/songs/newest')
+  .then(function(response) {
+    console.log("test response")
+    console.log(response)
+    AFRAME.offlineStatus = false;
+  })
+  AFRAME.offlineStatus = false;
+});
+window.addEventListener('offline', function(e) { 
+  AFRAME.offlineStatus = true;
+});
 
 

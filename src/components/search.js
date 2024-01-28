@@ -20,6 +20,24 @@ AFRAME.registerComponent('search', {
   },
 
   init: function () {
+    // check if we have a connection to the internet
+    // if we don't then filter by downloaded songs
+    console.log("online")
+    console.log(!window.navigator.online)
+    if(window.navigator.online === true )
+    {
+      fetch('https://cdn.beatsaver.com/89cf8bb07afb3c59ae7b5ac00337d62261c36fb4.zip').then((response) => {
+      console.log(" in search online check")
+      console.log(response.status)  
+      if (response.status !== 200) {
+        setAvailableSearchResultsToDownloaded()
+    }
+    }).catch((err) => {
+      console.log("error")
+      console.log(err)
+      setAvailableSearchResultsToDownloaded()
+    })
+    }
     this.eventDetail = { query: '', results: topSearch, url: '', page: 0 };
     this.keyboardEl = document.getElementById('keyboard');
     this.popularHits = topSearch;
@@ -149,6 +167,58 @@ AFRAME.registerComponent('search', {
   }
 });
 
+window.addEventListener('online', ()=>{
+  console.log("online")
+
+  // double check that we are online
+  fetch('https://cdn.beatsaver.com/89cf8bb07afb3c59ae7b5ac00337d62261c36fb4.zip').then((response) => {
+    console.log(" in search online check")
+    console.log(response.status)
+  if (response.status !== 200) {
+    const allItems = topSearchRaw.map(convertBeatmap);
+    // add all the songs in allItems that aren't in topSearch
+    allItems.forEach((item) => {
+      let found = false;
+      for (let i = 0; i < topSearch.length; i++) {
+        if (item.directDownload === topSearch[i].directDownload) {
+          found = true;
+          break;
+        }
+      }
+      if (!found) {
+        topSearch.push(item);
+      }
+    })
+  }
+})
+})
+
+window.addEventListener('offline', ()=>{
+  console.log("offline")
+  const downloadedSongsURLs = []
+  getAllDownloadedSongs(downloadedSongsURLs).then((downloadedSongs) => {
+   // remove all the songs that aren't downloaded in topSearch
+   // console.log("DownloadedSongsUrls size")
+   // console.log(downloadedSongs.length)
+   for (let i = 0; i < topSearch.length; i++) {
+     console.log(topSearch[i])
+     let found = false;
+     for (let j = 0; j < downloadedSongs.length; j++) {
+       if (topSearch[i].directDownload === downloadedSongs[j].directDownload) {
+         found = true;
+         break;
+       }
+     }
+     if (!found) {
+       topSearch.splice(i, 1);
+       i--;
+     }
+   }
+   console.log("topSearch")
+   console.log(topSearch.length)
+ })
+})
+
 /**
  * Click listener for search result.
  */
@@ -183,4 +253,60 @@ function shuffle (array) {
     const j = Math.floor(Math.random() * (i + 1));
     [array[i], array[j]] = [array[j], array[i]];
   }
+}
+
+function getAllDownloadedSongs(downloadedSongsURLs) {
+  return new Promise((resolve, reject) => {
+  const dbName = 'songs';
+  const dbVersion = 1;
+  const db_request = indexedDB.open(dbName, dbVersion);
+  db_request.onerror = function(event) {
+    console.log("error: ");
+  };
+  db_request.onsuccess = function(event) {
+    const db = event.target.result;
+  const transaction = db.transaction(["songs"]);
+  const objectStore = transaction.objectStore("songs");
+  const request = objectStore.getAll();
+  request.onerror = function(event) {
+    console.log("error: ");
+    reject();
+  };
+  request.onsuccess = function(event) {
+    console.log("success: "+event.target.result);
+    const cursor = event.target.result;
+    if (cursor) {
+      console.log("songs")
+      for (let i = 0; i < cursor.length; i++) {
+        downloadedSongsURLs
+        downloadedSongsURLs.push(cursor[i].songData)
+      }
+      resolve(downloadedSongsURLs);
+    }
+  };
+}})
+}
+
+function setAvailableSearchResultsToDownloaded() {
+  const downloadedSongsURLs = []
+  getAllDownloadedSongs(downloadedSongsURLs).then((downloadedSongs) => {
+   // remove all the songs that aren't downloaded in topSearch
+   // console.log("DownloadedSongsUrls size")
+   // console.log(downloadedSongs.length)
+   for (let i = 0; i < topSearch.length; i++) {
+     let found = false;
+     for (let j = 0; j < downloadedSongs.length; j++) {
+       if (topSearch[i].directDownload === downloadedSongs[j].directDownload) {
+         found = true;
+         break;
+       }
+     }
+     if (!found) {
+       topSearch.splice(i, 1);
+       i--;
+     }
+   }
+   console.log("topSearch")
+   console.log(topSearch.length)
+ })
 }

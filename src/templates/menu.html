@@ -26,6 +26,12 @@
   mixin="slice" raycaster-target="width: 1; height: 0.32" render-order="menubutton"
   slice9="width: 0.8; color: {{ COLORS.UI_ACCENT }}; height: 0.130; padding: 0.03; opacity: 0"></a-mixin>
 
+<!-- Add text if offline -->
+<a-entity id="searchOfflineText" mixin="font" bind__visible="!offlineStatus" render-order="menutext"
+position="0 0.7 0.01"
+  text="align: center; baseline: top; color: #FFF; wrapCount: 32; value: You are offline. You will only have access to downloaded songs.">
+</a-entity>
+
 <a-entity id="searchPrevPage" mixin="searchPageButton" bind__slice9="color: colorPrimary"
   bind__visible-raycastable="search.hasPrev && (mainMenuActive || isSearching)"
   raycaster-target="bindToggle: search.hasNext && menuActive; position: 0 0.08 0" position="-0 0.69 0.01"
