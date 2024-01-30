@@ -1,34 +1,56 @@
 {% set text = 'Moon Rider (v2.9)\n\n' %}
-{% set text = text + 'Open source demonstration codebase of a VR app built in HTML and JavaScript running on the Web.\n\n' %}
-{% set text = text + 'A side project built by two people in a few months as a resource for A-Frame developers. ' %}
-{% set text = text + 'Not meant to be an official, paid, nor fully released product.\n\n' %}
+{% set text = text + 'Modified from Moonrider https://github.com/supermedium/moonrider .\n\n' %}
 {% set text = text + 'Song maps sourced from beatsaver.com. Supports most browsers and headsets (including Quest).\n\n' %}
-{% set text = text + 'This game was meant to serve as an example of a VR app running inside a webpage to help progress the open WebXR initiative (bsaber.com/moonrider).\n\n' %}
-{% set text = text + 'Chat with us on moonrider.xyz/discord' %}
 
 <a-entity
   id="news"
   bind__visible="menuActive && !menuSelectedChallenge.id && !isMenuOpening"
-  position="2.365374194652176 1.6 -1.1952715561051024"
+  position="4.365374194652176 1.6 -1.1952715561051024"
   rotation="0 -60 0"
   render-order="menuitem">
 
   <a-entity
     id="newsBackground"
     bind-toggle__raycastable="menuActive && !menuSelectedChallenge.id && !isMenuOpening"
-    geometry="primitive: plane; width: 2.1; height: 1.9"
+    geometry="primitive: plane; width: 5.1; height: 1.9"
     material="shader: panelShader; ratio: 1.14; brightness: 0.2"></a-entity>
 
-  <a-entity
-    id="newsText"
-    mixin="font"
-    text="align: left; color: #FAFAFA; baseline: center; width: 1.6; wrapCount: 50; value: {{ text }}"
-    position="0 -0.04 0.001"></a-entity>
+    <!-- Select Username from list of usernames -->
+    <a-entity
+      id="usernameSelect"
+      bind__visible="!username"
+      position="-1 0.6 0.001"
+      mixin="font"
+      text="align: center; color: #FAFAFA; baseline: center; width: 1.6; wrapCount: 50; value: SELECT YOUR USERNAME"></a-entity>
+
+
+   
+
+    <a-entity
+      id="usernameInput"
+      bind__visible="!username"
+      position="1 0.1 0.001"
+      super-keyboard="inputColor: #fff; hand: {{ DEBUG_KEYBOARD and '#mouseCursor' or '#rightHand' }}; imagePath: assets/img/keyboard; font: assets/fonts/Viga-Regular.json; align: center; model: superkeyboard; keyColor: #fff; injectToRaycasterObjects: false; filters: allupper; keyHoverColor: #fff; maxLength: 15; width: 1.5; label: ENTER YOUR USERNAME; labelColor: #FAFAFA"
+      bind__super-keyboard="show: !username; hand: activeHand === 'left' && '#leftHand' || '#rightHand'; value: username"
+      position="0 -0.08 0.02"></a-entity>
+
+      <!-- button to add username-->
+    <a-entity
+    id="usernameAdd"
+    bind__visible="!username"
+    mixin="gameMenuButton"
+    bind-toggle__raycastable="isPaused || isGameOver"
+    position="1 -0.6 0.001"
+    proxy-event="event: click; to: a-scene; as: gamemenuexit">
+    <a-entity mixin="gameMenuButtonText" text="value: ADD USERNAME"></a-entity>
+  </a-entity>      
+
+
 </a-entity>
 
 <a-entity
   id="support"
-  bind__visible="menuActive && !menuSelectedChallenge.id && !isMenuOpening && inVR"
+  bind__visible="menuActive && !menuSelectedChallenge.id && !isMenuOpening"
   position="2.365374194652176 0.25 -1.1952715561051024"
   rotation="-15 -60 0"
   render-order="menuitem">
@@ -39,15 +61,9 @@
     geometry="primitive: plane; width: 2.1; height: 0.9"
     material="shader: panelShader; ratio: 1.14; brightness: 0.2"></a-entity>
 
-  <a-entity
-    id="supportImage"
-    geometry="primitive: plane; width: 0.6; height: 0.5"
-    material="shader: flat; src: /assets/img/banner.jpg"
-    position="-0.5 0 0.001"></a-entity>
-
-  <a-entity
-    id="supportText"
+    <a-entity
+    id="newsText"
     mixin="font"
-    text="align: left; color: #FAFAFA; baseline: center; width: 1; wrapCount: 30; value: Support Moon Rider's hosting and development by purchasing Supermedium. The VR Comic Book Reader for Oculus Quest.\nA new way to experience comics, in vivid grand scale and comfort.\n\nFree demo available at supermedium.com"
-    position="0.35 -0.04 0.001"></a-entity>
+    text="align: left; color: #FAFAFA; baseline: center; width: 1.6; wrapCount: 50; value: {{ text }}"
+    position="0 -0.04 0.001"></a-entity>
 </a-entity>

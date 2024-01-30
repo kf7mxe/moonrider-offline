@@ -1,6 +1,7 @@
 const firebase = require('firebase/app');
 const pr = require('profane-words');
 require('firebase/firestore');
+require('firebase/firestore')
 
 const NUM_SCORES_DISPLAYED = 10;
 const ba = /(fuc)|(ass)|(nig)|(shit)|(retard)/gi;
@@ -34,6 +35,8 @@ AFRAME.registerComponent('leaderboard', {
     this.scores = [];
     this.eventDetail = {scores: this.scores};
     this.addEventDetail = {scoreData: undefined, index: undefined};
+
+    this.userNames = localStorage.getItem('userNames') || []
 
     this.username = localStorage.getItem('moonriderusername') || 'Super Zealot';
     this.el.addEventListener('leaderboardusername', evt => {
